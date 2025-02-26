@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,33 +22,36 @@ public class ProductoController {
     private ProductoRepository productoRepository;
 
     @PostMapping
-    public Producto agregarProducto(@RequestBody Producto producto) {
-        return productoRepository.save(producto);
+    public Mono<Producto> agregarProducto(@RequestBody Producto producto) {
+        return Mono.just(productoRepository.save(producto));
     }
 
     @PostMapping("/bulk")
-    public List<Producto> agregarProductos(@RequestBody List<Producto> productos) {
-        return productoRepository.saveAll(productos);
+    public Flux<Producto> agregarProductos(@RequestBody List<Producto> productos) {
+        return Flux.fromIterable(productoRepository.saveAll(productos));
     }
 
     @GetMapping
-    public List<Producto> listarProductos() {
-        return productoRepository.findAll();
+    public Flux<Producto> listarProductos() {
+        return Flux.fromIterable(productoRepository.findAll());
     }
 
     @GetMapping("/{id}")
-    public Optional<Producto> obtenerProductoPorId(@PathVariable Long id) {
-        return productoRepository.findById(id);
+    public Mono<ResponseEntity<Producto>> obtenerProductoPorId(@PathVariable Long id) {
+        Optional<Producto> productoOptional = productoRepository.findById(id);
+        return productoOptional.map(producto -> Mono.just(ResponseEntity.ok(producto)))
+                .orElseGet(() -> Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()));
     }
 
     @PutMapping("/{id}")
-    public Producto actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
+    public Mono<ResponseEntity<Producto>> actualizarProducto(@PathVariable Long id, @RequestBody Producto producto) {
         producto.setId(id);
-        return productoRepository.save(producto);
+        Producto productoActualizado = productoRepository.save(producto);
+        return Mono.just(ResponseEntity.ok(productoActualizado));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> eliminarProducto(@PathVariable Long id) {
+    public Mono<ResponseEntity<Map<String, String>>> eliminarProducto(@PathVariable Long id) {
         Optional<Producto> productoOptional = productoRepository.findById(id);
 
         if (productoOptional.isPresent()) {
@@ -55,11 +60,11 @@ public class ProductoController {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Producto con ID " + id + " eliminado correctamente.");
 
-            return ResponseEntity.ok(response);
+            return Mono.just(ResponseEntity.ok(response));
         } else {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Producto con ID " + id + " no encontrado.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).body(response));
         }
     }
 }
