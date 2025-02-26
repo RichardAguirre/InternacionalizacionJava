@@ -211,8 +211,12 @@ Se utiliza StepVerifier para probar el flujo reactivo de los productos.
 
 #### Ejecución de Pruebas
 
-Para ejecutar las pruebas, usa el siguiente comando:
+Para ejecutar las pruebas, se usa el siguiente comando:
 
 ```sh
 mvn test
 ```
+
+![image](https://github.com/user-attachments/assets/617e90a6-821a-4c70-a742-89722c35e139)
+
+
