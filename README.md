@@ -66,7 +66,7 @@ Respuesta exitosa:
 
 #### Agregar Múltiples Productos (Bulk)
 
-```POST
+```http
   POST /api/productos/bulk
 ```
 
