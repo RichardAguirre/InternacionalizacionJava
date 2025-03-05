@@ -1,11 +1,12 @@
 package com.example.parcial2.controllers;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import reactor.core.publisher.Mono;
 import java.util.Locale;
 
 @RestController
@@ -16,8 +17,14 @@ public class SaludoController {
     private MessageSource messageSource;
 
     @GetMapping("/saludo")
-    public String obtenerSaludo(@RequestParam(name = "lang", defaultValue = "es") String lang) {
-        Locale locale = "en".equals(lang) ? Locale.ENGLISH : new Locale("es");
-        return messageSource.getMessage("saludo", null, locale);
+    public Mono<String> obtenerSaludo(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        Locale locale = request.getHeaders().getAcceptLanguage().stream()
+                .findFirst()
+                .map(Locale.LanguageRange::getRange)
+                .map(Locale::forLanguageTag)
+                .orElse(Locale.ENGLISH);
+
+        return Mono.just(messageSource.getMessage("saludo", null, locale));
     }
 }

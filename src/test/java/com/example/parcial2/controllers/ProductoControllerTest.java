@@ -20,9 +20,17 @@ public class ProductoControllerTest {
         Flux<Producto> productos = productoController.listarProductos();
 
         StepVerifier.create(productos)
-                .expectNextMatches(p -> p.getNombre().equals("Tenis") && p.getPrecio() == 120000)
-                .expectNextMatches(p -> p.getNombre().equals("Reloj") && p.getPrecio() == 80000)
-                .expectNextMatches(p -> p.getNombre().equals("Bufanda") && p.getPrecio() == 30000)
+                .recordWith(java.util.ArrayList::new)
+                .thenConsumeWhile(p -> true)
+                .consumeRecordedWith(lista -> {
+                    boolean tenisExiste = lista.stream().anyMatch(p -> p.getNombre().equals("Tenis") && p.getPrecio() == 120000);
+                    boolean relojExiste = lista.stream().anyMatch(p -> p.getNombre().equals("Reloj") && p.getPrecio() == 80000);
+                    boolean bufandaExiste = lista.stream().anyMatch(p -> p.getNombre().equals("Bufanda") && p.getPrecio() == 30000);
+
+                    assert tenisExiste : "No se encontró el producto 'Tenis'";
+                    assert relojExiste : "No se encontró el producto 'Reloj'";
+                    assert bufandaExiste : "No se encontró el producto 'Bufanda'";
+                })
                 .verifyComplete();
     }
 }

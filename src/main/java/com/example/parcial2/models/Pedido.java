@@ -9,25 +9,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "producto")
-public class Producto {
+@Table(name = "pedido")
+public class Pedido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String nombre;
+    private String producto;
 
     @Column(nullable = false)
-    private double precio;
+    private int cantidad;
 
-    public Producto(String nombre, double precio) {
-        this.nombre = nombre;
-        this.precio = precio;
-    }
+    @Column(nullable = false)
+    private double total;
 
-    public void setId(Long id) {
-        this.id = id;
+    public Pedido(String producto, int cantidad, double total) {
+        this.producto = producto;
+        this.cantidad = cantidad;
+        this.total = total;
     }
 }
